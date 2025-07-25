@@ -2,7 +2,7 @@ using System.IO;
 
 // Define the base path for the backups
 string baseFolderPath = Directory.GetCurrentDirectory();
-var addedPath = baseFolderPath;
+var addedPath = System.IO.Path.Combine(baseFolderPath, "Script Outputs");
 var modelName = Model.Database.Name; // Retrieve the model name
 var modelID = Model.Database.ID;
 
