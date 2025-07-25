@@ -2,7 +2,7 @@ using System.IO;
 
 // Define the base path for the backups
 string baseFolderPath = Directory.GetCurrentDirectory();
-var addedPath = System.IO.Path.Combine(baseFolderPath, "Script Outputs");
+var addedPath = baseFolderPath;
 
 // Dynamically find the latest-dated folder
 string[] folders = System.IO.Directory.GetDirectories(addedPath);
@@ -27,7 +27,7 @@ foreach (string folder in folders)
 // Use the latest-dated folder, or fallback to today's date if no valid folder is found
 var currentDateStr = latestFolder != null ? latestDate.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd");
 
-var dateFolderPath = basePath;
+var dateFolderPath = baseFolderPath;
 
 // Retrieve the model name
 var modelName = Model.Database.Name;
