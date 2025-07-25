@@ -2,7 +2,7 @@ using System.IO;
 
 // Define the base path for the backups
 string baseFolderPath = Directory.GetCurrentDirectory();
-var addedPath = System.IO.Path.Combine(baseFolderPath, "Script Outputs");
+var addedPath = baseFolderPath;
 var modelName = Model.Database.Name; // Retrieve the model name
 var modelID = Model.Database.ID;
 
@@ -30,7 +30,7 @@ foreach (string folder in folders)
 var currentDateStr = latestFolder != null ? latestDate.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd");
 
 // Create the directory path
-var dateFolderPath = basePath;
+var dateFolderPath = addedPath;
 
 // Define the path for the new file
 var filePath = System.IO.Path.Combine(dateFolderPath, modelName + ".csv");
