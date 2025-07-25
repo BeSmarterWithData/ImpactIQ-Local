@@ -1,7 +1,8 @@
-// Define the base path for the backups
+using System.IO;
 
-var basePath = @"C:\Power BI Backups\Local Reports and Models";
-var addedPath = basePath;
+// Define the base path for the backups
+string baseFolderPath = Directory.GetCurrentDirectory();
+var addedPath = baseFolderPath;
 
 // Dynamically find the latest-dated folder
 string[] folders = System.IO.Directory.GetDirectories(addedPath);
