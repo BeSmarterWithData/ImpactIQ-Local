@@ -85,8 +85,9 @@ if (-not (Test-Path -Path $TabularEditorFolderPath)) {
 
 
 # Start Tabular Editor process
-$p = Start-Process -filePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru `
-       -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script1Path`" -B `"localhost\tabular`" `"MyModel`""
+$p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru `
+    -WorkingDirectory $baseFolderPath `
+    -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script1Path`""
 
 # Define the output Excel file path in the parent folder
 $outputExcelFile = Join-Path -Path $baseFolderPath -ChildPath "Report Detail.xlsx"
@@ -167,8 +168,9 @@ foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
-    $modelScriptArgs = "`"$bimPath`" -S `"$Script2Path`" -B `"localhost\tabular`" `"MyModel`""
-    Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
+    $modelScriptArgs = "`"$bimPath`" -S `"$Script2Path`""
+    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $baseFolderPath  
+    -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
 
 Write-Output "First model export and script run completed."
@@ -200,8 +202,9 @@ foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
-    $modelScriptArgs = "`"$bimPath`" -S `"$Script3Path`" -B `"localhost\tabular`" `"MyModel`""
-    Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
+    $modelScriptArgs = "`"$bimPath`" -S `"$Script3Path`""
+    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $baseFolderPath  
+    -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
 
 Write-Output "Second model export and script run completed."
