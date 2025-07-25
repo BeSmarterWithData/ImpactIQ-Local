@@ -2,7 +2,7 @@ using System.IO;
 
 // Define the base path for the backups
 string baseFolderPath = Directory.GetCurrentDirectory();
-var addedPath = baseFolderPath;
+var addedPath = System.IO.Path.Combine(baseFolderPath, "Script Outputs");
 
 // Dynamically find the latest-dated folder
 string[] folders = System.IO.Directory.GetDirectories(addedPath);
