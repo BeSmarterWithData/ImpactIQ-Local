@@ -86,7 +86,7 @@ if (-not (Test-Path -Path $TabularEditorFolderPath)) {
 
 # Start Tabular Editor process
 $p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru `
-    -WorkingDirectory $baseFolderPath `
+    -WorkingDirectory $localFilesFolderPath `
     -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script1Path`""
 
 # Define the output Excel file path in the parent folder
@@ -169,7 +169,7 @@ foreach ($bimFile in $bimFiles) {
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
     $modelScriptArgs = "`"$bimPath`" -S `"$Script2Path`""
-    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $baseFolderPath  
+    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $localFilesFolderPath  
     -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
 
@@ -203,7 +203,7 @@ foreach ($bimFile in $bimFiles) {
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
     $modelScriptArgs = "`"$bimPath`" -S `"$Script3Path`""
-    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $baseFolderPath  
+    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $localFilesFolderPath  
     -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
 
