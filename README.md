@@ -19,7 +19,7 @@ This provides a quick and automated way to identify where and how specific field
 
 ## 🚀 Quick Start Instructions
 
-Follow these 4 simple steps to get started:
+Follow these 5 simple steps to get started:
 
 
 
