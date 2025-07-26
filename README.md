@@ -46,7 +46,7 @@ Follow these 4 simple steps to get started:
 
 
 #### ✅ Step 4: Open the Power BI File — *let it refresh, then save as `.pbix`*  
-> Open: `Power BI Governance Model.pbit`
+> Open: `Local Power BI Governance Model.pbit`
 
 
 .
