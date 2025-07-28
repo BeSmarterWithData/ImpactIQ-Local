@@ -82,7 +82,7 @@ Follow these 5 simple steps to get started:
 > 
 > Update your Power BI Desktop privacy settings:  
 > **File → Options and settings → Options → Privacy**  
-> Then select:  
+> Then select either:  
 > - “Combine data according to each file's Privacy Level settings”  
 >   **or**  
 > - “Always ignore Privacy Level settings”
