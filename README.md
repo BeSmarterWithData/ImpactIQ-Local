@@ -74,13 +74,13 @@ Follow these 5 simple steps to get started:
 > Includes `pbi-tools v1.2`: https://github.com/pbi-tools/pbi-tools _(AGPL 3.0 License)_
 
 > 🚨 *Using Tabular Editor 3?*  
-> Tabular Editor 2 is still required. TE3 doesn't support command line execution.
+> Tabular Editor 2 is still included and required for this because TE3 doesn't support command line execution.
 
-> 🧩 *Privacy setting error in Power BI Desktop?*  
+> 🧩 *Model refresh error in Power BI Desktop?*  
 > If you see:  
 > _**"Query XXXXXX references other queries or steps..."**_
 > 
-> Change your Power BI privacy settings:  
+> Update your Power BI Desktop privacy settings:  
 > **File → Options and settings → Options → Privacy**  
 > Then select:  
 > - “Combine data according to each file's Privacy Level settings”  
