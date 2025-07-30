@@ -36,7 +36,7 @@ var dateFolderPath = addedPath;
 var filePath = System.IO.Path.Combine(dateFolderPath, modelName + ".csv");
 
 // Define the header for the file
-var header = "\"Type\",\"Table\",\"Name\",\"FormatString\",\"DisplayFolder\",\"Description\",\"IsHidden\",\"Expression\",\"ModelAsOfDate\",\"ModelName\",\"ModelID\",\"RelationshipFromTable\",\"RelationshipFromColumn\",\"RelationshipToTable\",\"RelationshipToColumn\",\"RelationshipStatus\",\"RelationshipFromCardinality\",\"RelationshipToCardinality\",\"RelationshipCrossFilteringBehavior\"";
+var header = "\"Type\",\"Table\",\"Name\",\"FormatString\",\"DisplayFolder\",\"Description\",\"IsHidden\",\"TableStorageMode\",\"Expression\",\"ModelAsOfDate\",\"ModelName\",\"ModelID\",\"RelationshipFromTable\",\"RelationshipFromColumn\",\"RelationshipToTable\",\"RelationshipToColumn\",\"RelationshipStatus\",\"RelationshipFromCardinality\",\"RelationshipToCardinality\",\"RelationshipCrossFilteringBehavior\"";
 
 // Initialize a string builder to collect data
 var sb = new System.Text.StringBuilder();
@@ -54,6 +54,13 @@ Func<dynamic, string> FormatField = (field) =>
 // Add table data to the string builder
 foreach (var t in Model.Tables)
 {
+    string storageMode = "";
+    if (t.Partitions.Count > 0)
+    {
+        // Assume all partitions use the same mode – get it from the first
+        storageMode = t.Partitions[0].Mode.ToString();
+    }
+
     sb.AppendLine(string.Join(",", 
         FormatField("Table"),
         FormatField(t.Name),
@@ -62,6 +69,7 @@ foreach (var t in Model.Tables)
         FormatField(""),
         FormatField(""),
         FormatField(t.IsHidden.ToString()),
+        FormatField(storageMode),
         FormatField(""),
         FormatField(currentDateStr),
         FormatField(modelName),
@@ -89,6 +97,7 @@ foreach (var m in Model.CalculationGroups)
         FormatField(m.Description),
         FormatField(m.IsHidden.ToString()),
         FormatField(""),
+        FormatField(""),
         FormatField(currentDateStr),
         FormatField(modelName),
         FormatField(modelID),
@@ -114,6 +123,7 @@ foreach (var c in Model.AllColumns)
         FormatField(c.DisplayFolder),
         FormatField(c.Description),
         FormatField(c.IsHidden.ToString()),
+        FormatField(""),
         FormatField(""),
         FormatField(currentDateStr),
         FormatField(modelName),
@@ -143,6 +153,7 @@ foreach (var column in calculatedColumns)
         FormatField(column.DisplayFolder),
         FormatField(column.Description),
         FormatField(column.IsHidden.ToString()),
+        FormatField(""),
         FormatField(column.Expression),
         FormatField(currentDateStr),
         FormatField(modelName),
@@ -170,6 +181,7 @@ foreach (var am in Model.AllMeasures)
         FormatField(am.DisplayFolder),
         FormatField(am.Description),
         FormatField(am.IsHidden.ToString()),
+        FormatField(""),
         FormatField(am.Expression),
         FormatField(currentDateStr),
         FormatField(modelName),
@@ -197,6 +209,7 @@ foreach (var h in Model.AllHierarchies)
         FormatField(h.Description),
         FormatField(h.IsHidden.ToString()),
         FormatField(""),
+        FormatField(""),
         FormatField(currentDateStr),
         FormatField(modelName),
         FormatField(modelID),
@@ -223,6 +236,7 @@ foreach (var l in Model.AllLevels)
         FormatField(l.Description),
         FormatField(""),
         FormatField(""),
+        FormatField(""),
         FormatField(currentDateStr),
         FormatField(modelName),
         FormatField(modelID),
@@ -240,6 +254,9 @@ foreach (var l in Model.AllLevels)
 // Process Partitions
 foreach (var p in Model.AllPartitions)
 {
+
+    string storageMode = p.Mode.ToString();  // Get the storage mode from the partition
+
     sb.AppendLine(string.Join(",", 
         FormatField("Partition"),
         FormatField(p.Table.Name),
@@ -248,6 +265,7 @@ foreach (var p in Model.AllPartitions)
         FormatField(""),
         FormatField(p.Description),
         FormatField(""),
+        FormatField(storageMode),
         FormatField(p.Expression),
         FormatField(currentDateStr),
         FormatField(modelName),
@@ -270,6 +288,7 @@ foreach (var r in Model.Relationships)
         FormatField("Relationship"),
         FormatField(r.FromTable.Name),
         FormatField(r.FromColumn.Name),
+        FormatField(""),
         FormatField(""),
         FormatField(""),
         FormatField(""),
