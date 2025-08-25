@@ -18,7 +18,6 @@ using System.Text;
 
 // User Parameters
 string baseFolderPath = Directory.GetCurrentDirectory();
-
 // Do not modify these parameters
 var addedPath = baseFolderPath;
 
@@ -71,35 +70,17 @@ if (singleFile && addPersp)
 
 List<string> FileList = new List<string>();
 
-var sb_CustomVisuals = new System.Text.StringBuilder();
-sb_CustomVisuals.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "Name" + '\t' + "ReportDate" + newline);
-
-var sb_ReportFilters = new System.Text.StringBuilder();
-sb_ReportFilters.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "DisplayName" + '\t' + "TableName" + '\t' + "ObjectName" + '\t' + "ObjectType" + '\t' + "FilterType"  + '\t' + "HiddenFilter"  + '\t' + "LockedFilter"  + '\t' + "AppliedFilterVersion"  + '\t' + "ReportDate" + newline);
-
-var sb_VisualObjects = new System.Text.StringBuilder();
-sb_VisualObjects.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "PageName" + '\t' + "PageId" + '\t' + "VisualId" + '\t' + "VisualType" + '\t' + "AppliedFilterVersion" + '\t' + "CustomVisualFlag" + '\t' + "TableName" + '\t' + "ObjectName" + '\t' + "ObjectType" + '\t' + "Source" + '\t' + "DisplayName" + '\t' + "ReportDate" + newline);
-
-var sb_VisualFilters = new System.Text.StringBuilder();
-sb_VisualFilters.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "PageName" + '\t' + "PageId" + '\t' + "VisualId" + '\t' + "TableName" + '\t' + "ObjectName" + '\t' + "ObjectType" + '\t' + "FilterType" + '\t' + "HiddenFilter"  + '\t' + "LockedFilter"  + '\t' + "AppliedFilterVersion"  + '\t' + "DisplayName" + '\t' + "ReportDate" + newline);
-
-var sb_PageFilters = new System.Text.StringBuilder();
-sb_PageFilters.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "PageId" + '\t' + "PageName" + '\t' + "DisplayName" + '\t' + "TableName" + '\t' + "ObjectName" + '\t' + "ObjectType" + '\t' + "FilterType" + '\t' + "HiddenFilter"  + '\t' + "LockedFilter"  + '\t' + "AppliedFilterVersion"  + '\t' + "ReportDate" + newline);
-
-var sb_Bookmarks = new System.Text.StringBuilder();
-sb_Bookmarks.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "Name" + '\t' + "Id" + '\t' + "PageName" + '\t' +"PageId" + '\t' + "VisualId" + '\t' + "VisualHiddenFlag" + '\t' + "ReportDate" + newline);
-
-var sb_Pages = new System.Text.StringBuilder();
-sb_Pages.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "Id" + '\t' + "Name" + '\t' + "Number" + '\t' + "Width" + '\t' + "Height" + '\t' + "HiddenFlag" + '\t' + "VisualCount" + '\t' + "BackgroundImage" + '\t' + "WallpaperImage" + '\t' + "Type" + '\t' + "ReportDate" + newline);
-
-var sb_Visuals = new System.Text.StringBuilder();
-sb_Visuals.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "PageName" + '\t' + "PageId" + '\t' + "Id" + '\t' + "Name" + '\t' + "Type" + '\t' + "CustomVisualFlag" + '\t' + "HiddenFlag" + '\t' + "X" + '\t' + "Y" + '\t' + "Z" + '\t' + "Width" + '\t' + "Height" + '\t' + "ObjectCount" + '\t' + "ShowItemsNoDataFlag" + '\t' + "SlicerType" + '\t' + "ParentGroup" + '\t' + "ReportDate" + newline);
-
-var sb_Connections = new System.Text.StringBuilder();
-sb_Connections.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "ServerName" + '\t' + "Type" + '\t' + "ReportDate" + newline);
-
-var sb_VisualInteractions = new System.Text.StringBuilder();
-sb_VisualInteractions.Append("ReportName" + '\t' + "ReportID" + '\t' + "ModelID" + '\t' + "PageName" + '\t' + "PageId" + '\t' + "SourceVisualID" + '\t' + "TargetVisualID" + '\t' + "TypeID" + '\t' + "Type" + '\t' + "ReportDate" + newline);
+var sb_CustomVisuals       = new System.Text.StringBuilder();
+var sb_ReportFilters       = new System.Text.StringBuilder();
+var sb_VisualObjects       = new System.Text.StringBuilder();
+var sb_VisualFilters       = new System.Text.StringBuilder();
+var sb_PageFilters         = new System.Text.StringBuilder();
+var sb_Bookmarks           = new System.Text.StringBuilder();
+var sb_Pages               = new System.Text.StringBuilder();
+var sb_Visuals             = new System.Text.StringBuilder();
+var sb_Connections         = new System.Text.StringBuilder();
+var sb_VisualInteractions  = new System.Text.StringBuilder();
+var sb_ReportLevelMeasures = new System.Text.StringBuilder();
 
 if (pbiFile.Length > 0 && pbiFolderName.Length == 0)
 {
@@ -108,7 +89,8 @@ if (pbiFile.Length > 0 && pbiFolderName.Length == 0)
 }    
 else if (pbiFile.Length == 0 && pbiFolderName.Length > 0)
 {
-    foreach (var x in System.IO.Directory.GetFiles(pbiFolderName, "*.pbi*"))
+    // Get all subdirectories in the latest date folder instead of files
+    foreach (var x in Directory.GetDirectories(pbiFolderName))
     {
         FileList.Add(x);
     }
@@ -130,51 +112,13 @@ foreach (var rpt in FileList)
     var Pages = new List<Page>();
     var Connections = new List<Connection>();
     var VisualInteractions = new List<VisualInteraction>();
-    string fileExt = Path.GetExtension(rpt);
-    string ReportName = Path.GetFileNameWithoutExtension(rpt);
+    var ReportLevelMeasures = new List<ReportLevelMeasures>();
+    
+    // Since rpt is now a directory path, get the folder name as ReportName
+    string ReportName = Path.GetFileName(rpt);
     string ReportDate = latestFolder != null ? latestDate.ToString("yyyy-MM-dd") : DateTime.Now.ToString("yyyy-MM-dd");
     string folderName = Path.GetDirectoryName(rpt) + @"\";
-    string zipPath = folderName + ReportName + ".zip";
-    string unzipPath = folderName + ReportName;
-
-if (!(fileExt == ".pbix" || fileExt == ".pbit"))
-{
-    Error("'" + rpt + "' is not a valid file. File(s) must be a valid .pbix or .pbit.");
-    return;
-}
-
-bool extractionSucceeded = false;
-
-try
-{
-    // Make a copy of a pbi and turn it into a zip file
-    File.Copy(rpt, zipPath);
-    // Unzip file
-    System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, unzipPath);
-    extractionSucceeded = true; // Set flag to true if extraction is successful
-}
-catch (System.IO.PathTooLongException)
-{
-    // Log or handle the PathTooLongException if needed
-}
-catch (System.IO.DirectoryNotFoundException)
-{
-    // Log or handle the DirectoryNotFoundException if needed
-}
-catch (System.IO.InvalidDataException ex)
-{
-
-}
-catch (Exception ex)
-{
-    
-}
-finally
-    {
-        // Delete zip file
-        File.Delete(zipPath);
-    }
-
+    string unzipPath = rpt; // rpt is already the directory path, no need for unzipping
 
 
 
@@ -314,15 +258,6 @@ if (File.Exists(connPath))
     Connections.Add(new Connection { ServerName = svName, ModelID = ModelID, Type = connType, ReportID = ReportID });        
 }
     
-
-    //Delete previously created folder
-    try
-    {
-        Directory.Delete(folderName + ReportName,true);
-    }
-    catch
-    {
-    }
 
     // Custom Visuals
     try
@@ -476,6 +411,109 @@ catch (Exception ex)
 
 
 
+
+
+
+// ****ReportLevelMeasures (C# 5.0 compatible) ****
+try
+{
+    string configRaw = (string)json["config"];
+    if (!string.IsNullOrEmpty(configRaw))
+    {
+        var configToken = Newtonsoft.Json.Linq.JToken.Parse(configRaw);
+
+        Action<Newtonsoft.Json.Linq.JToken> processEntities = delegate(Newtonsoft.Json.Linq.JToken entitiesToken)
+        {
+            if (entitiesToken == null) return;
+
+            foreach (var ent in entitiesToken.Children())
+            {
+                string tableName = (string)ent["name"];
+                if (string.IsNullOrEmpty(tableName))
+                    tableName = (string)ent["Name"];
+
+                var measures = ent["measures"];
+                if (measures == null) measures = ent["Measures"];
+                if (measures == null) continue;
+
+                foreach (var m in measures.Children())
+                {
+                    try
+                    {
+                        // renamed: measureName → objectName
+                        string objectName = (string)m["name"];
+                        if (string.IsNullOrEmpty(objectName))
+                            objectName = (string)m["Name"];
+
+                        string expr = (string)m["expression"];
+                        if (string.IsNullOrEmpty(expr))
+                            expr = (string)m["Expression"];
+
+                        bool hidden = false;
+                        try { hidden = (bool)m["hidden"]; } catch { }
+
+                        string formatStr = "";
+                        try { formatStr = (string)m["formatInformation"]["formatString"]; } catch { }
+
+                        // Escape tabs so they don’t break your .txt structure
+                        expr = expr.Replace("\t", " ");
+                        formatStr = formatStr.Replace("\t", " ");
+
+                        // Remove all newlines completely (collapse into one line)
+                        expr = expr.Replace("\r\n", " ").Replace("\n", " ");
+                        formatStr = formatStr.Replace("\r\n", " ").Replace("\n", " ");
+
+                        // Added: objectType is always "Measure"
+                        string objectType = "Measure";
+
+                        // Keep it raw text with tabs
+                        sb_ReportLevelMeasures.Append(
+                            ReportName + '\t' +
+                            ReportID + '\t' +
+                            ModelID + '\t' +
+                            tableName + '\t' +
+                            objectName + '\t' +
+                            objectType + '\t' +   // inserted after objectName
+                            expr + '\t' +
+                            hidden.ToString().ToLower() + '\t' +
+                            formatStr + '\t' +
+                            ReportDate + newline
+                        );
+                    }
+                    catch
+                    {
+                        // Skip malformed measure
+                    }
+                }
+            }
+        };
+
+        // Path 1: modelExtensions -> entities -> measures
+        var modelExtensions = configToken["modelExtensions"];
+        if (modelExtensions == null) modelExtensions = configToken["ModelExtensions"];
+        if (modelExtensions != null)
+        {
+            foreach (var me in modelExtensions.Children())
+            {
+                var entities = me["entities"];
+                if (entities == null) entities = me["Entities"];
+                processEntities(entities);
+            }
+        }
+
+        // Path 2: Extension -> Entities -> Measures
+        var extension = configToken["Extension"];
+        if (extension != null)
+        {
+            var extensionEntities = extension["Entities"];
+            processEntities(extensionEntities);
+        }
+    }
+}
+catch
+{
+    // Ignore if config not present or parse fails
+}
 
 
 
@@ -2871,62 +2909,55 @@ try
         }
     }    
     
-    // Add results to StringBuilders
+    // === Add results to StringBuilders (rows only, no headers) ===
     foreach (var x in CustomVisuals.ToList())
-    {
-        sb_CustomVisuals.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.Name + '\t' + ReportDate +  newline);
-    }
+        sb_CustomVisuals.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.Name + '\t' + ReportDate + newline);
+
     foreach (var x in ReportFilters.ToList())
-    {
         sb_ReportFilters.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.displayName + '\t' + x.TableName + '\t' + x.ObjectName + '\t' + x.ObjectType + '\t' + x.FilterType + '\t' + x.HiddenFilter + '\t' + x.LockedFilter + '\t' + x.AppliedFilterVersion + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in PageFilters.ToList())
-    {
         sb_PageFilters.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.PageId + '\t' + x.PageName + '\t' + x.displayName + '\t' + x.TableName + '\t' + x.ObjectName + '\t' + x.ObjectType + '\t' + x.FilterType + '\t' + x.HiddenFilter + '\t' + x.LockedFilter + '\t' + x.AppliedFilterVersion + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in VisualFilters.ToList())
-    {
         sb_VisualFilters.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.PageName + '\t' + x.PageId + '\t' + x.VisualId + '\t' + x.TableName + '\t' + x.ObjectName + '\t' + x.ObjectType + '\t' + x.FilterType + '\t' + x.HiddenFilter + '\t' + x.LockedFilter + '\t' + x.AppliedFilterVersion + '\t' + x.displayName + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in VisualObjects.ToList())
-    {
         sb_VisualObjects.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.PageName + '\t' + x.PageId + '\t' + x.VisualId + '\t' + x.VisualType + '\t' + x.AppliedFilterVersion + '\t' + x.CustomVisualFlag + '\t' + x.TableName + '\t' + x.ObjectName + '\t' + x.ObjectType + '\t' + x.Source + '\t' + x.displayName + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in Bookmarks.ToList())
-    {
         sb_Bookmarks.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.Name + '\t' + x.Id + '\t' + x.PageName + '\t' + x.PageId + '\t' + x.VisualId + '\t' + x.VisualHiddenFlag + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in Pages.ToList())
-    {
         sb_Pages.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.Id + '\t' + x.Name + '\t' + x.Number + '\t' + x.Width + '\t' + x.Height + '\t' + x.HiddenFlag + '\t' + x.VisualCount + '\t' + x.BackgroundImage + '\t' + x.WallpaperImage + '\t' + x.Type + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in Visuals.ToList())
-    {
         sb_Visuals.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.PageName + '\t' + x.PageId + '\t' + x.Id + '\t' + x.Name + '\t' + x.Type + '\t' + x.CustomVisualFlag + '\t' + x.HiddenFlag + '\t' + x.X + '\t' + x.Y + '\t' + x.Z + '\t' + x.Width + '\t' + x.Height + '\t' + x.ObjectCount + '\t' + x.ShowItemsNoDataFlag + '\t' + x.SlicerType + '\t' + x.ParentGroup + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in Connections.ToList())
-    {
         sb_Connections.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.ServerName + '\t' + x.Type + '\t' + ReportDate + newline);
-    }
+
     foreach (var x in VisualInteractions.ToList())
-    {
-        sb_VisualInteractions.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.PageName + '\t' + x.PageId + '\t' + x.SourceVisualID + '\t' + x.TargetVisualID + '\t' + x.TypeID + '\t' + x.Type + '\t' + ReportDate +    newline);
-    }
+        sb_VisualInteractions.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + x.PageName + '\t' + x.PageId + '\t' + x.SourceVisualID + '\t' + x.TargetVisualID + '\t' + x.TypeID + '\t' + x.Type + '\t' + ReportDate + newline);
+
+    foreach (var m in ReportLevelMeasures.ToList())
+        sb_ReportLevelMeasures.Append(ReportName + '\t' + ReportID + '\t' + ModelID + '\t' + m.TableName + '\t' + m.ObjectName + '\t' + m.ObjectType + '\t' + m.Expression + '\t' + m.HiddenFlag + '\t' + m.FormatString + '\t' + ReportDate + newline);
 }
 
-// Save to text files or print out results
+// === Save rows only: append to existing TXT files ===
 if (saveToFile)
 {    
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"CustomVisuals.txt", sb_CustomVisuals.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"ReportFilters.txt", sb_ReportFilters.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"PageFilters.txt", sb_PageFilters.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"VisualFilters.txt", sb_VisualFilters.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"VisualObjects.txt", sb_VisualObjects.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"Visuals.txt", sb_Visuals.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"Bookmarks.txt", sb_Bookmarks.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"Pages.txt", sb_Pages.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"Connections.txt", sb_Connections.ToString());
-    System.IO.File.WriteAllText(pbiFolderName+@"\"+"VisualInteractions.txt", sb_VisualInteractions.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "CustomVisuals.txt"), sb_CustomVisuals.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "ReportFilters.txt"), sb_ReportFilters.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "PageFilters.txt"), sb_PageFilters.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "VisualFilters.txt"), sb_VisualFilters.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "VisualObjects.txt"), sb_VisualObjects.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "Visuals.txt"), sb_Visuals.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "Bookmarks.txt"), sb_Bookmarks.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "Pages.txt"), sb_Pages.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "Connections.txt"), sb_Connections.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "VisualInteractions.txt"), sb_VisualInteractions.ToString());
+    File.AppendAllText(Path.Combine(pbiFolderName, "ReportLevelMeasures.txt"), sb_ReportLevelMeasures.ToString());
 }
 else
 {
@@ -2940,6 +2971,7 @@ else
     sb_Pages.Output();
     sb_Connections.Output();
     sb_VisualInteractions.Output();
+    sb_ReportLevelMeasures.Output();
 }
 
 // Add dependencies to the perspective
@@ -3111,9 +3143,20 @@ if (createPersp)
         sb_Unused.Output();
     }
 }
-
+    //Delete folders
+try
+{
+    foreach (string dir in Directory.GetDirectories(baseFolderPath))
+    {
+        Directory.Delete(dir, true); // true = recursive (delete all contents)
+    }
+}
+catch (Exception ex)
+{
+}
 // Extra closing bracket for classes
 } // Comment out this line if using Tabular Editor 3
+
 
 // Classes for each object set
 public class CustomVisual
@@ -3264,6 +3307,20 @@ public class VisualInteraction
     public string TargetVisualID { get; set; }
     public int TypeID { get; set; }
     public string Type { get; set; }
+    public string ReportDate { get; set; }
+}
+
+public class ReportLevelMeasures
+{
+    public string TableName { get; set; }
+    public string ObjectName { get; set; }
+    public string ObjectType { get; set; }
+    public string Expression { get; set; }
+    public string HiddenFlag { get; set; }
+    public string FormatString { get; set; }
+    public string ReportName { get; set; }
+    public string ReportID { get; set; }
+    public string ModelID { get; set; }
     public string ReportDate { get; set; }
 }
 
