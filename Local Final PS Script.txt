@@ -1,9 +1,10 @@
 # Define the base folder and script paths at the beginning of the script
 $baseFolderPath = "C:\Power BI Backups"
 $localFilesFolderPath = "$baseFolderPath\Local Reports and Models"
-$Script1Path = "$baseFolderPath\Config\Local Report Detail Extract Script.csx"
-$Script2Path = "$baseFolderPath\Config\Local Model Detail Extract Script.csx"
-$Script3Path = "$baseFolderPath\Config\Local Measure Dependency Extract Script.csx"
+$Script1Path = "$baseFolderPath\Config\Local Report Detail Extract Script-PBIR.csx"
+$Script2Path = "$baseFolderPath\Config\Local Report Detail Extract Script.csx"
+$Script3Path = "$baseFolderPath\Config\Local Model Detail Extract Script.csx"
+$Script4Path = "$baseFolderPath\Config\Local Measure Dependency Extract Script.csx"
 
 $TabularEditor2Path = "$baseFolderPath\Config\TabularEditor\TabularEditor.exe"
 
@@ -84,8 +85,11 @@ if (-not (Test-Path -Path $TabularEditorFolderPath)) {
 
 
 
-# Start Tabular Editor process
+# Start Tabular Editor process 1
 $p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -WorkingDirectory $localFilesFolderPath -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script1Path`""
+
+# Start Tabular Editor process 2
+$p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -WorkingDirectory $localFilesFolderPath -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script2Path`""
 
 # Define the output Excel file path in the parent folder
 $outputExcelFile = Join-Path -Path $baseFolderPath -ChildPath "Report Detail.xlsx"
@@ -124,6 +128,11 @@ foreach ($txtFile in (Get-ChildItem -Path $localFilesFolderPath -Filter *.txt)) 
 
 
 
+Write-Output "TXT files appended to $outputExcelFile"
+
+
+
+
 
 # Get only .pbix files in the base folder (not subfolders)
 $pbixFiles = Get-ChildItem -Path $localFilesFolderPath -Filter *.pbix -File
@@ -158,7 +167,7 @@ foreach ($pbixFile in $pbixFiles) {
 
 
 
-#### Start of Model Detail Script Run with Script2Path ####
+#### Start of Model Detail Script Run with Script3Path ####
 
 $bimFiles = Get-ChildItem -Path $localFilesFolderPath -Filter *.bim
 
@@ -166,7 +175,7 @@ foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
-    $modelScriptArgs = "`"$bimPath`" -S `"$Script2Path`""
+    $modelScriptArgs = "`"$bimPath`" -S `"$Script3Path`""
     Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $localFilesFolderPath -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
 
@@ -193,13 +202,13 @@ $semanticModelsCsvData | Export-Excel -Path $outputExcelFile -WorksheetName "Sem
 
 Write-Output "CSV files combined into the 'Semantic Models' worksheet in $outputExcelFile"
 
-#### Start of Model Detail Script Run with Script3Path ####
+#### Start of Model Detail Script Run with Script4Path ####
 
 foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
-    $modelScriptArgs = "`"$bimPath`" -S `"$Script3Path`""
+    $modelScriptArgs = "`"$bimPath`" -S `"$Script4Path`""
     Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $localFilesFolderPath -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
 
