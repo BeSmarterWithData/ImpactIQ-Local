@@ -92,7 +92,7 @@ Follow these 5 simple steps to get started:
 ### ✨ Recently Added Features
 
 - **Unused Model Objects** → Identify model fields/measures not used in any visuals, measures, or relationships.  
-- **Broken Visuals (with Page Links)** → See all broken visuals/filters and jump directly to the impacted report page.  
+- **Broken Visuals** → See all broken visuals/filters.  
 - **Report-Level Measures Inventory** → Surface report-only measures with full DAX and usage details.
   
 ---
