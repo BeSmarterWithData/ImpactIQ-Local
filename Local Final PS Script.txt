@@ -1,5 +1,9 @@
 # Define the base folder and script paths at the beginning of the script
+
+
 $baseFolderPath = "C:\Power BI Backups"
+
+
 $localFilesFolderPath = "$baseFolderPath\Local Reports and Models"
 $Script1Path = "$baseFolderPath\Config\Local Report Detail Extract Script-PBIR.csx"
 $Script2Path = "$baseFolderPath\Config\Local Report Detail Extract Script.csx"
@@ -45,7 +49,7 @@ if (-not (Test-Path -Path $PBIToolsFolderPath)) {
     }
 }
 
-$ErrorActionPreference = "SilentlyContinue"
+$ErrorActionPreference="SilentlyContinue"; $WarningPreference="SilentlyContinue"
 
 # Define the folder path and zip pattern for Tabular Editor
 $TabularEditorFolderPath = Join-Path -Path $baseFolderPath\Config -ChildPath "TabularEditor"
@@ -68,6 +72,8 @@ if (-not (Test-Path -Path $TabularEditorFolderPath)) {
     Write-Output "Tabular Editor folder already exists at $TabularEditorFolderPath"
 }
 
+# Track script start time
+$scriptStartTime = Get-Date
 
 
 
@@ -248,4 +254,9 @@ foreach ($ext in $fileExtensions) {
         Move-Item -Path $file.FullName -Destination $destinationPath -Force
     }
 }
+
+$scriptEndTime = Get-Date
+$elapsedTime = New-TimeSpan -Start $scriptStartTime -End $scriptEndTime
+Write-Host "Total Elapsed Time: $($elapsedTime.Hours)h $($elapsedTime.Minutes)m $($elapsedTime.Seconds)s"
+ 
  
