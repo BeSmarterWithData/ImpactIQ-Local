@@ -27,7 +27,7 @@ You’ve got **two ways** to get started:
 ### 🟢 Option 1 — One-Click Auto Run (Recommended)  
 Always up-to-date and the easiest way to get started.  
 
-➡️ [**Download & Run One-Click Auto Run**](https://github.com/chris1642/Local-Power-BI-Impact-Analysis-Governance/releases/download/v1.0/LocalPBIGovernance-UpdateAndRun.bat)
+➡️ [**Download One-Click Auto Update and Run**](https://github.com/chris1642/Local-Power-BI-Impact-Analysis-Governance/releases/download/v1.0/LocalPBIGovernance-UpdateAndRun.bat)
 
 This automatically:  
 1. Pulls the latest repo from GitHub
