@@ -49,6 +49,8 @@ if (-not (Test-Path -Path $PBIToolsFolderPath)) {
     }
 }
 
+$pbiToolsPath = Join-Path -Path $baseFolderPath -ChildPath "Config\PBI Tools\pbi-tools.exe"
+
 $ErrorActionPreference="SilentlyContinue"; $WarningPreference="SilentlyContinue"
 
 # Define the folder path and zip pattern for Tabular Editor
@@ -150,10 +152,10 @@ foreach ($pbixFile in $pbixFiles) {
     $bimFinalPath = Join-Path -Path $localFilesFolderPath -ChildPath "$pbixNameWithoutExtension.bim"
 
     Write-Output "Extracting: $pbixFilePath"
-    pbi-tools extract $pbixFilePath -extractFolder $extractFolder -modelSerialization Raw
+    & $pbiToolsPath extract $pbixFilePath -extractFolder $extractFolder -modelSerialization Raw
 
     Write-Output "Generating .bim file..."
-    pbi-tools generate-bim $extractFolder -transforms RemovePBIDataSourceVersion
+    & $pbiToolsPath generate-bim $extractFolder -transforms RemovePBIDataSourceVersion
 
     $bimGenerated = Get-ChildItem -Path $extractFolder -Filter *.bim -File | Select-Object -First 1
     if ($bimGenerated) {
