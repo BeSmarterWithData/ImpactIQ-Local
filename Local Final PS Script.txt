@@ -159,8 +159,29 @@ foreach ($pbixFile in $pbixFiles) {
 
     $bimGenerated = Get-ChildItem -Path $extractFolder -Filter *.bim -File | Select-Object -First 1
     if ($bimGenerated) {
+        # --- Update BIM with Tabular Editor ---
+        $fileName = [System.IO.Path]::GetFileNameWithoutExtension($bimGenerated.Name)
+
+        $csharpScript = @"
+Model.Database.Name = "$fileName";
+Model.Database.ID   = "$fileName";
+"@
+
+        $tempScriptPath = Join-Path $env:TEMP "TabularEditor_Rename.cs"
+        Set-Content -Path $tempScriptPath -Value $csharpScript -Encoding UTF8
+
+        # Path to Tabular Editor executable
+        $TabularEditor2Path = "$baseFolderPath\Config\TabularEditor\TabularEditor.exe"
+
+        Write-Output "Updating BIM with Tabular Editor for $fileName..."
+        $args = "`"$($bimGenerated.FullName)`" -S `"$tempScriptPath`" -B `"$($bimGenerated.FullName)`""
+        Start-Process -FilePath $TabularEditor2Path -Wait -NoNewWindow -ArgumentList $args
+
+        Remove-Item -Path $tempScriptPath -Force
+
+        # --- Move updated BIM to final destination ---
         Move-Item -Path $bimGenerated.FullName -Destination $bimFinalPath -Force
-        Write-Output "Moved .bim to $bimFinalPath"
+        Write-Output "Updated and moved .bim to $bimFinalPath"
     } else {
         Write-Warning "No .bim file found in $extractFolder"
     }
