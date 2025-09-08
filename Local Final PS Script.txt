@@ -142,49 +142,34 @@ Write-Output "TXT files appended to $outputExcelFile"
 
 
 
-# Get only .pbix files in the base folder (not subfolders)
+# -------------------
+# Phase 1: Extract PBIX and Generate BIMs
+# -------------------
+
 $pbixFiles = Get-ChildItem -Path $localFilesFolderPath -Filter *.pbix -File
 
 foreach ($pbixFile in $pbixFiles) {
     $pbixFilePath = $pbixFile.FullName
     $pbixNameWithoutExtension = [System.IO.Path]::GetFileNameWithoutExtension($pbixFile.Name)
-    $extractFolder = Join-Path -Path $localFilesFolderPath -ChildPath "$pbixNameWithoutExtension.extract"
-    $bimFinalPath = Join-Path -Path $localFilesFolderPath -ChildPath "$pbixNameWithoutExtension.bim"
 
-    Write-Output "Extracting: $pbixFilePath"
+    $extractFolder = Join-Path -Path $localFilesFolderPath -ChildPath $pbixNameWithoutExtension
+    $bimGenerated  = Join-Path -Path $extractFolder -ChildPath "$pbixNameWithoutExtension.bim"
+    $bimFinalPath  = Join-Path -Path $localFilesFolderPath -ChildPath "$pbixNameWithoutExtension.bim"
+
+    Write-Output "Extracting PBIX: $pbixFilePath"
     & $pbiToolsPath extract $pbixFilePath -extractFolder $extractFolder -modelSerialization Raw
 
-    Write-Output "Generating .bim file..."
+    Write-Output "Generating BIM from extract..."
     & $pbiToolsPath generate-bim $extractFolder -transforms RemovePBIDataSourceVersion
 
-    $bimGenerated = Get-ChildItem -Path $extractFolder -Filter *.bim -File | Select-Object -First 1
-    if ($bimGenerated) {
-        # --- Update BIM with Tabular Editor ---
-        $fileName = [System.IO.Path]::GetFileNameWithoutExtension($bimGenerated.Name)
-
-        $csharpScript = @"
-Model.Database.Name = "$fileName";
-Model.Database.ID   = "$fileName";
-"@
-
-        $tempScriptPath = Join-Path $env:TEMP "TabularEditor_Rename.cs"
-        Set-Content -Path $tempScriptPath -Value $csharpScript -Encoding UTF8
-
-        # Path to Tabular Editor executable
-        $TabularEditor2Path = "$baseFolderPath\Config\TabularEditor\TabularEditor.exe"
-
-        Write-Output "Updating BIM with Tabular Editor for $fileName..."
-        $args = "`"$($bimGenerated.FullName)`" -S `"$tempScriptPath`" -B `"$($bimGenerated.FullName)`""
-        Start-Process -FilePath $TabularEditor2Path -Wait -NoNewWindow -ArgumentList $args
-
-        Remove-Item -Path $tempScriptPath -Force
-
-        # --- Move updated BIM to final destination ---
-        Move-Item -Path $bimGenerated.FullName -Destination $bimFinalPath -Force
-        Write-Output "Updated and moved .bim to $bimFinalPath"
-    } else {
-        Write-Warning "No .bim file found in $extractFolder"
+    if (-not (Test-Path $bimGenerated)) {
+        Write-Error "Expected BIM not found: $bimGenerated"
+        continue
     }
+
+    # Move generated BIM to final location
+    Move-Item -Path $bimGenerated -Destination $bimFinalPath -Force
+    Write-Output "Generated BIM moved to $bimFinalPath"
 
     # Clean up extract folder
     if (Test-Path $extractFolder) {
@@ -193,6 +178,32 @@ Model.Database.ID   = "$fileName";
     }
 }
 
+# -------------------
+# Phase 2: Rename BIMs with Tabular Editor
+# -------------------
+
+$bimFiles = Get-ChildItem -Path $localFilesFolderPath -Filter *.bim -File
+
+foreach ($bimFile in $bimFiles) {
+    $bimPath = $bimFile.FullName
+    $fileNameWithoutExt = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
+
+    # Build rename C# script
+    $csharpScript = @"
+Model.Database.Name = "$fileNameWithoutExt";
+Model.Database.ID   = "$fileNameWithoutExt";
+"@
+
+    $tempScriptPath = Join-Path $env:TEMP "TabularEditor_Rename.cs"
+    Set-Content -Path $tempScriptPath -Value $csharpScript -Encoding UTF8
+
+    Write-Output "Renaming Database/ID inside BIM: $bimPath"
+    $args = @("`"$bimPath`"", "-S", "`"$tempScriptPath`"", "-B", "`"$bimPath`"")
+    Start-Process -FilePath $TabularEditor2Path -Wait -NoNewWindow -ArgumentList $args
+
+
+    Remove-Item -Path $tempScriptPath -Force
+}
 
 
 
@@ -276,6 +287,15 @@ foreach ($ext in $fileExtensions) {
         $destinationPath = Join-Path -Path $scriptOutputsFolder -ChildPath $file.Name
         Move-Item -Path $file.FullName -Destination $destinationPath -Force
     }
+}
+
+# Remove all folders in $localFilesFolderPath except $scriptOutputsFolder
+$foldersToRemove = Get-ChildItem -Path $localFilesFolderPath -Directory |
+    Where-Object { $_.FullName -ne $scriptOutputsFolder }
+
+foreach ($folder in $foldersToRemove) {
+    Remove-Item -Path $folder.FullName -Recurse -Force
+    Write-Output "Removed folder: $($folder.FullName)"
 }
 
 $scriptEndTime = Get-Date
