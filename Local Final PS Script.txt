@@ -156,10 +156,10 @@ foreach ($pbixFile in $pbixFiles) {
     $bimGenerated  = Join-Path -Path $extractFolder -ChildPath "$pbixNameWithoutExtension.bim"
     $bimFinalPath  = Join-Path -Path $localFilesFolderPath -ChildPath "$pbixNameWithoutExtension.bim"
 
-    Write-Output "Extracting PBIX: $pbixFilePath"
+    Write-Output "Extracting Model from $pbixNameWithoutExtension"
     & $pbiToolsPath extract $pbixFilePath -extractFolder $extractFolder -modelSerialization Raw
 
-    Write-Output "Generating BIM from extract..."
+    Write-Host "Generating BIM from extract..."
     & $pbiToolsPath generate-bim $extractFolder -transforms RemovePBIDataSourceVersion
 
     if (-not (Test-Path $bimGenerated)) {
@@ -169,12 +169,12 @@ foreach ($pbixFile in $pbixFiles) {
 
     # Move generated BIM to final location
     Move-Item -Path $bimGenerated -Destination $bimFinalPath -Force
-    Write-Output "Generated BIM moved to $bimFinalPath"
+    Write-Host "Generated BIM moved to $bimFinalPath"
 
     # Clean up extract folder
     if (Test-Path $extractFolder) {
         Remove-Item -Path $extractFolder -Recurse -Force
-        Write-Output "Removed extract folder: $extractFolder"
+        Write-Host "Removed extract folder: $extractFolder"
     }
 }
 
@@ -197,7 +197,7 @@ Model.Database.ID   = "$fileNameWithoutExt";
     $tempScriptPath = Join-Path $env:TEMP "TabularEditor_Rename.cs"
     Set-Content -Path $tempScriptPath -Value $csharpScript -Encoding UTF8
 
-    Write-Output "Renaming Database/ID inside BIM: $bimPath"
+    Write-Host "Renaming Database/ID inside BIM: $bimPath"
     $args = @("`"$bimPath`"", "-S", "`"$tempScriptPath`"", "-B", "`"$bimPath`"")
     Start-Process -FilePath $TabularEditor2Path -Wait -NoNewWindow -ArgumentList $args
 
@@ -274,7 +274,6 @@ $scriptOutputsFolder = Join-Path -Path $localFilesFolderPath -ChildPath "Script 
 # Create the folder if it doesn't exist
 if (-not (Test-Path -Path $scriptOutputsFolder)) {
     New-Item -Path $scriptOutputsFolder -ItemType Directory | Out-Null
-    Write-Output "Created folder: $scriptOutputsFolder"
 }
 
 # Define file extensions to move
@@ -295,11 +294,10 @@ $foldersToRemove = Get-ChildItem -Path $localFilesFolderPath -Directory |
 
 foreach ($folder in $foldersToRemove) {
     Remove-Item -Path $folder.FullName -Recurse -Force
-    Write-Output "Removed folder: $($folder.FullName)"
 }
 
 $scriptEndTime = Get-Date
 $elapsedTime = New-TimeSpan -Start $scriptStartTime -End $scriptEndTime
-Write-Host "Total Elapsed Time: $($elapsedTime.Hours)h $($elapsedTime.Minutes)m $($elapsedTime.Seconds)s"
+Write-Output "Total Elapsed Time: $($elapsedTime.Hours)h $($elapsedTime.Minutes)m $($elapsedTime.Seconds)s"
  
  
