@@ -2829,72 +2829,66 @@ try
 
 
 
-    try
+try
+{
+    string configEnd = (string)json["config"];
+    string formattedconfigEndJson = Newtonsoft.Json.Linq.JToken.Parse(configEnd).ToString();
+    dynamic configEndJson = Newtonsoft.Json.Linq.JObject.Parse(formattedconfigEndJson);
+    
+    // Helper: add one row for a bookmark leaf (has explorationState)
+    Action<Newtonsoft.Json.Linq.JToken> addLeaf = (node) =>
     {
-        string configEnd = (string)json["config"];
-        string formattedconfigEndJson = Newtonsoft.Json.Linq.JToken.Parse(configEnd).ToString();
-        dynamic configEndJson = Newtonsoft.Json.Linq.JObject.Parse(formattedconfigEndJson);
-
-        foreach (var o in configEndJson["bookmarks"].Children())
+        try
         {
-            string bName = o["displayName"];
-            string bId = o["name"];
-            string rptPageId = o["explorationState"]["activeSection"];
-                    
-            try
+            if (node["explorationState"] == null)
+                return;
+                
+            string bName = (string)node["displayName"];
+            string bId = (string)node["name"];
+            string rptPageId = (string)node["explorationState"]["activeSection"];
+            
+            // Get page name from existing Pages collection
+            string pageName = "";
+            var page = Pages.FirstOrDefault(p => p.Id == rptPageId);
+            if (page != null)
+                pageName = page.Name;
+                
+            Bookmarks.Add(new Bookmark
             {
-                foreach (var v in Visuals.Where(a => a.PageName == Pages.Where(z => z.Id == rptPageId).FirstOrDefault().Name).ToList())
+                Id = bId,
+                Name = bName,
+                PageId = rptPageId,
+                PageName = pageName,  // Remove this line if your class doesn't have PageName
+                VisualId = "",
+                VisualHiddenFlag = false
+            });
+        }
+        catch { }
+    };
+    
+    // Walk the bookmarks array at report level (handle groups and leaves)
+    foreach (var bk in configEndJson["bookmarks"])
+    {
+        try
+        {
+            if (bk["children"] != null)
+            {
+                foreach (var child in bk["children"])
                 {
-                    string vizId = v.Id;
-                    bool hm = false;
-                    try
-                    {  
-                        string vT = (string)o["explorationState"]["sections"][rptPageId]["visualContainers"][vizId]["singleVisual"]["visualType"];    
-                        
-                        // visualContainers
-                        try
-                        {
-                            string mode = (string)o["explorationState"]["sections"][rptPageId]["visualContainers"][vizId]["singleVisual"]["display"]["mode"];
-                            if (mode == "hidden")
-                            {
-                                hm = true;
-                            }
-                        }
-                        catch
-                        {
-                        }                                                
-                        
-                        Bookmarks.Add(new Bookmark {Id = bId, Name = bName, PageId = rptPageId, VisualId = vizId, VisualHiddenFlag = hm});
-                    }
-                    catch
-                    {
-                    }
-
-                    // visualContainerGroups
-                    try
-                    {
-                        bool mode = (bool)o["explorationState"]["sections"][rptPageId]["visualContainerGroups"][vizId]["isHidden"];
-                        
-                        if (mode)
-                        {
-                            hm = true;
-                        }
-                        
-                        Bookmarks.Add(new Bookmark {Id = bId, Name = bName, PageId = rptPageId, VisualId = vizId, VisualHiddenFlag = hm});
-                    }
-                    catch
-                    {
-                    }
+                    addLeaf(child);
                 }
             }
-            catch
+            else
             {
-            } 
+                addLeaf(bk); // standalone bookmark
+            }
         }
+        catch { }
     }
-    catch
-    {
-    }
+}
+catch
+{
+}
 
     // Update for Visual Groups
     foreach (var x in Visuals.ToList())
