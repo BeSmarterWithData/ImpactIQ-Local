@@ -74,34 +74,6 @@ if (-not (Test-Path -Path $TabularEditorFolderPath)) {
     Write-Output "Tabular Editor folder already exists at $TabularEditorFolderPath"
 }
 
-function Clear-RoslynCache {
-    Write-Host "Clearing Roslyn compilation cache..."
-    
-    # Stop any running Tabular Editor processes
-    Get-Process "TabularEditor*" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-    
-    # Clear temp compilation files
-    Get-ChildItem -Path $env:TEMP -Filter "*.cs" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
-    Get-ChildItem -Path $env:TEMP -Filter "*roslyn*" -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
-    Get-ChildItem -Path $env:TEMP -Filter "*csx*" -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
-    
-    # Clear .NET compilation cache
-    $netCache = "$env:LOCALAPPDATA\Microsoft\VisualStudio"
-    if (Test-Path $netCache) {
-        Get-ChildItem -Path $netCache -Directory | ForEach-Object {
-            $cachePath = Join-Path $_.FullName "ComponentModelCache"
-            if (Test-Path $cachePath) {
-                Remove-Item -Path $cachePath -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
-    }
-    
-    # Force garbage collection
-    [System.GC]::Collect()
-    [System.GC]::WaitForPendingFinalizers()
-    Start-Sleep -Seconds 2
-}
-
 # Track script start time
 $scriptStartTime = Get-Date
 
@@ -122,11 +94,8 @@ $scriptStartTime = Get-Date
 
 
 # Start Tabular Editor process 1
-
-Clear-RoslynCache
 $p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -WorkingDirectory $localFilesFolderPath -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script1Path`""
 
-Clear-RoslynCache
 # Start Tabular Editor process 2
 $p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -WorkingDirectory $localFilesFolderPath -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script2Path`""
 
@@ -215,8 +184,6 @@ foreach ($pbixFile in $pbixFiles) {
 
 $bimFiles = Get-ChildItem -Path $localFilesFolderPath -Filter *.bim -File
 
-Clear-RoslynCache
-
 foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $fileNameWithoutExt = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
@@ -243,7 +210,7 @@ Model.Database.ID   = "$fileNameWithoutExt";
 #### Start of Model Detail Script Run with Script3Path ####
 
 $bimFiles = Get-ChildItem -Path $localFilesFolderPath -Filter *.bim
-Clear-RoslynCache
+
 foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
@@ -276,7 +243,7 @@ $semanticModelsCsvData | Export-Excel -Path $outputExcelFile -WorksheetName "Sem
 Write-Output "CSV files combined into the 'Semantic Models' worksheet in $outputExcelFile"
 
 #### Start of Model Detail Script Run with Script4Path ####
-Clear-RoslynCache
+
 foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
