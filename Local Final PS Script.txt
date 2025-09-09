@@ -94,15 +94,10 @@ $scriptStartTime = Get-Date
 
 
 # Start Tabular Editor process 1
-Push-Location $localFilesFolderPath
-& $TabularEditor2Path (Join-Path $baseFolderPath 'Config\Blank Model.bim') '-S' $Script1Path | Out-Host
-Pop-Location
+$p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -WorkingDirectory $localFilesFolderPath -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script1Path`""
 
 # Start Tabular Editor process 2
-Push-Location $localFilesFolderPath
-& $TabularEditor2Path (Join-Path $baseFolderPath 'Config\Blank Model.bim') '-S' $Script2Path | Out-Host
-Pop-Location
-
+$p = Start-Process -FilePath "$TabularEditor2Path" -Wait -NoNewWindow -PassThru -WorkingDirectory $localFilesFolderPath -ArgumentList "`"$baseFolderPath\Config\Blank Model.bim`" -S `"$Script2Path`""
 
 # Define the output Excel file path in the parent folder
 $outputExcelFile = Join-Path -Path $baseFolderPath -ChildPath "Report Detail.xlsx"
@@ -203,10 +198,9 @@ Model.Database.ID   = "$fileNameWithoutExt";
     Set-Content -Path $tempScriptPath -Value $csharpScript -Encoding UTF8
 
     Write-Host "Renaming Database/ID inside BIM: $bimPath"
+    $args = @("`"$bimPath`"", "-S", "`"$tempScriptPath`"", "-B", "`"$bimPath`"")
+    Start-Process -FilePath $TabularEditor2Path -Wait -NoNewWindow -ArgumentList $args
 
-    Push-Location $localFilesFolderPath
-    & $TabularEditor2Path $bimPath '-S' $tempScriptPath '-B' $bimPath | Out-Host
-    Pop-Location
 
     Remove-Item -Path $tempScriptPath -Force
 }
@@ -221,11 +215,8 @@ foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
-    Write-Host "Running Script3Path on: $bimPath"
-
-    Push-Location $localFilesFolderPath
-    & $TabularEditor2Path $bimPath '-S' $Script3Path | Out-Host
-    Pop-Location
+    $modelScriptArgs = "`"$bimPath`" -S `"$Script3Path`""
+    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $localFilesFolderPath -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
 
 Write-Output "First model export and script run completed."
@@ -257,13 +248,9 @@ foreach ($bimFile in $bimFiles) {
     $bimPath = $bimFile.FullName
     $cleanFileName = [System.IO.Path]::GetFileNameWithoutExtension($bimFile.Name)
 
-    Write-Host "Running Script4Path on: $bimPath"
-
-    Push-Location $localFilesFolderPath
-    & $TabularEditor2Path $bimPath '-S' $Script4Path | Out-Host
-    Pop-Location
+    $modelScriptArgs = "`"$bimPath`" -S `"$Script4Path`""
+    Start-Process -FilePath "$TabularEditor2Path" -WorkingDirectory $localFilesFolderPath -Wait -NoNewWindow -PassThru -ArgumentList $modelScriptArgs
 }
-
 
 Write-Output "Second model export and script run completed."
 
