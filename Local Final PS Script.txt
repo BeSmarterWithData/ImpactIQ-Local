@@ -184,6 +184,15 @@ Write-Output "TXT files appended to $outputExcelFile"
 # Phase 1: Extract PBIX and Generate BIMs
 # -------------------
 
+# Function: get first free drive letter (Z down to D)
+function Get-FreeDriveLetter {
+    $used = Get-PSDrive -PSProvider FileSystem | ForEach-Object { $_.Name }
+    foreach ($letter in [char[]](90..68)) {  # Z..D
+        if ($used -notcontains $letter) { return "${letter}:" }
+    }
+    throw "No free drive letters available."
+}
+
 $pbixFiles = Get-ChildItem -Path $localFilesFolderPath -Filter *.pbix -File
 
 foreach ($pbixFile in $pbixFiles) {
@@ -195,26 +204,56 @@ foreach ($pbixFile in $pbixFiles) {
     $bimFinalPath  = Join-Path -Path $localFilesFolderPath -ChildPath "$pbixNameWithoutExtension.bim"
 
     Write-Output "Extracting Model from $pbixNameWithoutExtension"
-    & $pbiToolsPath extract $pbixFilePath -extractFolder $extractFolder -modelSerialization Raw
 
-    Write-Host "Generating BIM from extract..."
-    & $pbiToolsPath generate-bim $extractFolder -transforms RemovePBIDataSourceVersion
+    # Ensure extract folder exists
+    if (-not (Test-Path $extractFolder)) {
+        New-Item -ItemType Directory -Path $extractFolder -Force | Out-Null
+    }
 
-    if (-not (Test-Path $bimGenerated)) {
-        Write-Error "Expected BIM not found: $bimGenerated"
+    # Map extract folder to a short drive path
+    $driveLetter = Get-FreeDriveLetter
+    if (Test-Path $driveLetter) { subst $driveLetter /D }
+    $substCommand = "subst $driveLetter `"$extractFolder`""
+    Write-Host "Running command: $substCommand"
+    cmd.exe /c $substCommand
+
+    if (-not (Test-Path $driveLetter)) {
+        Write-Error "Failed to map $extractFolder to $driveLetter"
         continue
     }
 
-    # Move generated BIM to final location
-    Move-Item -Path $bimGenerated -Destination $bimFinalPath -Force
-    Write-Host "Generated BIM moved to $bimFinalPath"
+try {
+    # Extract and generate BIM using subst path
+    & $pbiToolsPath extract $pbixFilePath -extractFolder $driveLetter -modelSerialization Raw
 
-    # Clean up extract folder
-    if (Test-Path $extractFolder) {
-        Remove-Item -Path $extractFolder -Recurse -Force
-        Write-Host "Removed extract folder: $extractFolder"
+    # BIM that pbi-tools actually writes
+    $bimTemp = Join-Path -Path $extractFolder -ChildPath ".bim"
+    
+    Write-Host "Generating BIM from extract..."
+    & $pbiToolsPath generate-bim $driveLetter -transforms RemovePBIDataSourceVersion
+    
+    if (-not (Test-Path $bimTemp)) {
+        Write-Error "Expected BIM not found: $bimTemp"
+        continue
+    }
+    
+    # Rename it to match PBIX
+    Move-Item -Path $bimTemp -Destination $bimFinalPath -Force
+    Write-Host "Generated BIM moved to $bimFinalPath"
+    
+    }
+    finally {
+        # Always cleanup subst drive
+        subst $driveLetter /D
+    
+        # Clean up extract folder (after BIM is safely moved)
+        if (Test-Path $extractFolder) {
+            Remove-Item -Path $extractFolder -Recurse -Force
+            Write-Host "Removed extract folder: $extractFolder"
+        }
     }
 }
+
 
 # -------------------
 # Phase 2: Rename BIMs with Tabular Editor
