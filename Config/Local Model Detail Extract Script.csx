@@ -90,7 +90,7 @@ foreach (var m in Model.CalculationGroups)
 {
     sb.AppendLine(string.Join(",", 
         FormatField("CalculationGroup"),
-        FormatField(""),
+        FormatField(m.Name),
         FormatField(m.Name),
         FormatField(""),
         FormatField(""),
@@ -110,6 +110,33 @@ foreach (var m in Model.CalculationGroups)
         FormatField(""),
         FormatField("")
     ));
+    
+    // Add calculation items for this calculation group
+    foreach (var item in m.CalculationItems)
+    {
+        sb.AppendLine(string.Join(",", 
+            FormatField("CalculationItem"),
+            FormatField(m.Name),
+            FormatField(item.Name),
+            FormatField(""),
+            FormatField(""),
+            FormatField(item.Description),
+            FormatField(""),
+            FormatField(""),
+            FormatField(item.Expression),
+            FormatField(currentDateStr),
+            FormatField(modelName),
+            FormatField(modelID),
+            FormatField(""),
+            FormatField(""),
+            FormatField(""),
+            FormatField(""),
+            FormatField(""),
+            FormatField(""),
+            FormatField(""),
+            FormatField("")
+        ));
+    }
 }
 
 // Add columns data to the string builder
@@ -310,3 +337,4 @@ foreach (var r in Model.Relationships)
 
 // Write the file content to the file
 System.IO.File.WriteAllText(filePath, sb.ToString());
+
