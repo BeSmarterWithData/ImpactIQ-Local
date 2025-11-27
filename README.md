@@ -14,9 +14,16 @@ This provides a quick and automated way to identify where and how specific field
 - **Used and Unused Objects**: Identify which tables, columns, and measures are actively used and where. Equally as important, see what isn't used and can be safely removed from your model to save space and complexity.
 - **User-Friendly Output**: Results are presented in a Power BI model, making them easy to explore, analyze, and share with your team.
 
-     .
+---
 
-     .
+#### ✨ Recently Added Features
+
+- **Unused Model Objects** → Identify model fields/measures not used in any visuals, measures, calculated columns, or relationships.  
+- **Broken Visuals** → See all broken visuals/filters.  
+- **Report-Level Measures Inventory** → Surface report-only measures with full DAX and usage details.
+- **New Report Layouts & Wireframe** → See where your visuals sit on the page with a wireframe layout - thanks to @stephbruno for this feature!
+
+ ---
 
 ## 🚀 Quick Start Instructions  
 
@@ -102,13 +109,9 @@ This automatically:
 >   **or**  
 > - “Always ignore Privacy Level settings”
 
+
+---
 ## Features
-
-### ✨ Recently Added Features
-
-- **Unused Model Objects** → Identify model fields/measures not used in any visuals, measures, or relationships.  
-- **Broken Visuals** → See all broken visuals/filters.  
-- **Report-Level Measures Inventory** → Surface report-only measures with full DAX and usage details.
   
 ---
 
