@@ -9,7 +9,7 @@
 
 # Local Impact Analysis and Governance for Power BI
 
-*This is the local edition. If looking for the version that leverages the Power BI + Fabric Service and REST API across all Workspaces, check out Impact IQ's One-Click, Designed for Everyone edition: https://github.com/chris1642/Power-BI-Backup-Impact-Analysis-Governance-Solution*
+*This is the local edition. If looking for the version that leverages the Power BI + Fabric Service and REST API across all Workspaces, check out Impact IQ's One-Click, Designed for Everyone edition: https://github.com/BeSmarterWithData/ImpactIQ*
 
 - All computer requirements are at the user level and do not require admin privileges.
 - There are ZERO pre-reqs. It's as simple as downloading this repo into C:\Power BI Backups, placing your local files in the dedicated folder, opening Powershell, and running the included 'Final PS Script'
