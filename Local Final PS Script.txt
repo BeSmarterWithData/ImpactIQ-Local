@@ -103,13 +103,13 @@ if ($zipFile) {
 $pbiToolsPath = Join-Path -Path $baseFolderPath -ChildPath "Config\PBI Tools\pbi-tools.exe"
 
 # Ensure required modules are installed, and imports them. If import fails, error and exit early
-$requiredModules = @( 'ImportExcel', 'MicrosoftPowerBIMgmt' )
+$requiredModules = @( 'ImportExcel')
 foreach ($module in $requiredModules) {
-    if( -not (Import-Module $module -PassThru -EA ignore) ) {
-       Install-Module -Name $module -Scope CurrentUser -Force
+    if (-not (Import-Module $module -PassThru -EA Ignore)) {
+        Install-Module -Name $module -Scope CurrentUser -Force
     }
 
-    Import-Module $Module -ErrorAction 'stop' # In the rare case Install-Module fails, you probably want a terminating error
+    Import-Module $module
 }
 
 # Track script start time
