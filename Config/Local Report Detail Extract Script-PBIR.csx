@@ -1,4 +1,5 @@
 #r "System.IO"
+#r "System.IO.Compression"
 #r "System.IO.Compression.FileSystem"
 
 using System.IO;
@@ -283,10 +284,22 @@ foreach (var rpt in fileList)
     try
     {
         File.Copy(rpt, zipPath, true);
-        ZipFile.ExtractToDirectory(zipPath, unzipPath);
+        using (var archive = ZipFile.OpenRead(zipPath))
+        {
+            foreach (var entry in archive.Entries)
+            {
+                try
+                {
+                    string destPath = Path.Combine(unzipPath, entry.FullName);
+                    string destDir = Path.GetDirectoryName(destPath);
+                    if (!Directory.Exists(destDir)) Directory.CreateDirectory(destDir);
+                    if (!string.IsNullOrEmpty(entry.Name))
+                        entry.ExtractToFile(destPath, true);
+                }
+                catch { /* skip entries that fail (long path, etc.) */ }
+            }
+        }
         extractionSucceeded = true;
-        if (extractionSucceeded && Directory.Exists(unzipPath))
-            foldersToDelete.Add(unzipPath);
     }
     catch { }
     finally
