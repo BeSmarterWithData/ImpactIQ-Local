@@ -123,14 +123,14 @@ if ($zipFile) {
 
 $pbiToolsPath = Join-Path -Path $baseFolderPath -ChildPath "Config\PBI Tools\pbi-tools.exe"
 
-# Ensure required modules are installed, and imports them. If import fails, error and exit early
+# Ensure required modules are installed and attempt to import them without terminating the script
 $requiredModules = @( 'ImportExcel')
 foreach ($module in $requiredModules) {
     if (-not (Import-Module $module -PassThru -EA Ignore)) {
         Install-Module -Name $module -Scope CurrentUser -Force
     }
 
-    Import-Module $module
+    Import-Module $module -ErrorAction 'Continue'
 }
 
 # Track script start time
